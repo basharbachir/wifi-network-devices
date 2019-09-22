@@ -50,7 +50,7 @@ class _HomeState extends State<Home> {
     setState(() {
       isDiscovering = true;
       devices.clear();
-      found = -1;
+      found = 0;
     });
 
     final String ip = await Wifi.ip;
@@ -65,14 +65,11 @@ class _HomeState extends State<Home> {
     stream.listen((NetworkAddress addr) {
       if (addr.exists) {
         print('Found device: ${addr.ip}');
+        found += 1;
+        print(found);
       }
-    })
-    ..onDone(() {
-    setState(() {
-    isDiscovering = false;
-    found = devices.length;
     });
-    });
+
   }
 
 
@@ -80,17 +77,33 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Discover Local Network'),
+        iconTheme: IconThemeData(color: Colors.white),
+        title: const Text('Discover Local Network', style: TextStyle(color: Color(0xFF5B16D0))),
+          backgroundColor: Color(0xFFCCFF90),
       ),
       body: Builder(
         builder: (BuildContext context) {
           return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.1, 0.4, 0.7, 0.9],
+                  colors: [
+                    Color(0xFFCCFF90),
+                    Color(0xFFB2FF59),
+                    Color(0xFF43A047),
+                    Color(0xFF388E3C),
+                  ],
+                ),
+              ),
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 TextField(
                   controller: portController,
+                  style: TextStyle(fontSize: 16, color: Color(0xFF5B16D0)),
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: 'Port',
@@ -98,20 +111,25 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 SizedBox(height: 10),
-                Text('Local ip: $localIp', style: TextStyle(fontSize: 16)),
+                Text('Local ip: $localIp', style: TextStyle(fontSize: 20, color: Color(0xFF5B16D0))),
                 SizedBox(height: 15),
                 RaisedButton(
+                  elevation: 1,
+                    shape: RoundedRectangleBorder(side: BorderSide(color: Colors.transparent), borderRadius: BorderRadius.circular(10)),
+                    color: Color(0xFF5B16D0),
                     child: Text(
-                        '${isDiscovering ? 'Discovering...' : 'Discover'}'),
+                        '${isDiscovering ? 'Discovering...' : 'Discover'}',
+                        style: TextStyle(fontSize: 16, color: Colors.white)),
+
                     onPressed: isDiscovering ? null : () => devicesList()),
                 SizedBox(height: 15),
                 found >= 0
-                    ? Text('Found: $found device(s)',
+                    ? Text('Found device(s)',
                     style: TextStyle(fontSize: 16))
                     : Container(),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: devices.length,
+                    itemCount: found,
                     itemBuilder: (BuildContext context, int index) {
                       return Column(
                         children: <Widget>[
